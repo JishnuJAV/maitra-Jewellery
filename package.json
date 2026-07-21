@@ -1,6 +1,6 @@
 {
-  "name": "maitra-jewellery",
-  "version": "1.0.3",
+  "name": "maitrajewellery",
+  "version": "1.0.4",
   "private": true,
   "scripts": {
     "dev": "next dev",
