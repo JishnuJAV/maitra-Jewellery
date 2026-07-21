@@ -19,10 +19,14 @@ export default function AddToCart({ product }: { product: Product }) {
     setTimeout(() => setAdded(false), 1800);
   }
 
+  const itemsTotal = product.price * qty;
   const orderMessage =
     `Hello ${site.name}! 🌸\n\nI'd like to order:\n` +
-    `• ${product.name} (Qty: ${qty}) — ${formatINR(product.price * qty)}\n\n` +
-    `Please share payment & delivery details.`;
+    `• ${product.name} (Qty: ${qty}) — ${formatINR(itemsTotal)}\n\n` +
+    `Subtotal: ${formatINR(itemsTotal)}\n` +
+    `Shipping: ${formatINR(site.shippingFee)}\n` +
+    `Total: ${formatINR(itemsTotal + site.shippingFee)}\n\n` +
+    `Please share payment details.`;
 
   return (
     <div className="space-y-4">

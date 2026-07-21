@@ -8,11 +8,6 @@ import { site } from '@/lib/site';
 export default function HomePage() {
   return (
     <>
-      {/* Announcement bar (free-shipping banner intentionally removed) */}
-      <div className="bg-denim-800 py-2 text-center text-xs font-medium tracking-wide text-mist-100 sm:text-sm">
-        ✨ New festive collection now live · Order easily on WhatsApp {site.phoneDisplay}
-      </div>
-
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-mist-100 to-mist-50">
         <div className="container-page grid items-center gap-10 py-14 lg:grid-cols-2 lg:py-20">

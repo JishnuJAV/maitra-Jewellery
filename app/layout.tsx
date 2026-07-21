@@ -5,6 +5,7 @@ import { site } from '@/lib/site';
 import { CartProvider } from '@/components/CartProvider';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import AnnouncementBar from '@/components/AnnouncementBar';
 
 const serif = Cormorant_Garamond({
   subsets: ['latin'],
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${serif.variable} ${sans.variable} ${script.variable}`}>
       <body className="font-sans">
         <CartProvider>
+          <AnnouncementBar />
           <Header />
           <main className="min-h-[60vh]">{children}</main>
           <Footer />

@@ -7,7 +7,7 @@ import { site, waLink } from '@/lib/site';
 import PaymentInfo from '@/components/PaymentInfo';
 
 export default function CheckoutPage() {
-  const { detailed, subtotal, count, ready } = useCart();
+  const { detailed, subtotal, shipping, total, count, ready } = useCart();
 
   const message =
     `Hello ${site.name}! 🌸\n\nI'd like to order:\n` +
@@ -15,14 +15,16 @@ export default function CheckoutPage() {
       .map((i) => `• ${i.name} (Qty: ${i.qty}) — ${formatINR(i.price * i.qty)}`)
       .join('\n') +
     `\n\nSubtotal: ${formatINR(subtotal)}` +
-    `\n\nI'm ready to pay via UPI/GPay. Please confirm shipping & total.`;
+    `\nShipping: ${formatINR(shipping)}` +
+    `\nTotal: ${formatINR(total)}` +
+    `\n\nI'm ready to pay ${formatINR(total)} via UPI/GPay.`;
 
   return (
     <div className="container-page py-12">
       <h1 className="section-title mb-2">Checkout</h1>
       <p className="mb-8 max-w-2xl text-neutral-600">
-        We take orders over WhatsApp so we can confirm availability and give you the exact total
-        including shipping. Send your order, then pay using the details below.
+        Send your order on WhatsApp, then pay the total (including ₹{site.shippingFee} shipping)
+        using the UPI details or by scanning the QR code below.
       </p>
 
       <div className="grid gap-10 lg:grid-cols-[1fr_340px]">
@@ -38,7 +40,7 @@ export default function CheckoutPage() {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2a10 10 0 0 0-8.7 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.8 14.2c-.2.6-1.4 1.2-2 1.3-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5-4.5-.2-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.4.7-.4h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.3.3c-.1.1-.3.3-.1.6.1.3.7 1.1 1.4 1.8.9.8 1.7 1 2 1.2.3.1.5.1.6-.1l.6-.8c.2-.3.4-.2.6-.1l1.9.9c.2.1.4.2.5.3.1.2.1.7-.1 1.3Z" />
                 </svg>
-                Send order to {site.phoneDisplay}
+                Send order on WhatsApp
               </a>
             ) : (
               <p className="text-sm text-neutral-500">
@@ -54,7 +56,7 @@ export default function CheckoutPage() {
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-denim-700 text-sm text-white">2</span>
               Pay securely
             </h2>
-            <PaymentInfo />
+            <PaymentInfo amount={ready ? total : 0} />
           </div>
 
           {/* Step 3 */}
@@ -85,11 +87,20 @@ export default function CheckoutPage() {
                   </li>
                 ))}
               </ul>
-              <div className="mt-4 flex justify-between border-t border-mist-200 pt-4 font-bold text-denim-800">
-                <span>Subtotal</span>
-                <span>{formatINR(subtotal)}</span>
+              <div className="mt-4 space-y-2 border-t border-mist-200 pt-4 text-sm">
+                <div className="flex justify-between text-neutral-600">
+                  <span>Subtotal</span>
+                  <span>{formatINR(subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-neutral-600">
+                  <span>Shipping</span>
+                  <span>{formatINR(shipping)}</span>
+                </div>
               </div>
-              <p className="mt-1 text-xs text-neutral-500">+ shipping (confirmed on WhatsApp)</p>
+              <div className="mt-2 flex justify-between border-t border-mist-200 pt-2 font-bold text-denim-800">
+                <span>Total</span>
+                <span>{formatINR(total)}</span>
+              </div>
             </>
           ) : (
             <p className="mt-4 text-sm text-neutral-500">No items yet.</p>

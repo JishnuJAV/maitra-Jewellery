@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { products } from '@/lib/products';
+import { site } from '@/lib/site';
 
 export type CartItem = { slug: string; qty: number };
 
@@ -20,6 +21,8 @@ type CartContextType = {
   clear: () => void;
   count: number;
   subtotal: number;
+  shipping: number;
+  total: number;
   detailed: { slug: string; qty: number; name: string; price: number; image: string }[];
   ready: boolean;
 };
@@ -82,6 +85,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const count = items.reduce((n, i) => n + i.qty, 0);
   const subtotal = detailed.reduce((n, i) => n + i.price * i.qty, 0);
+  const shipping = count > 0 ? site.shippingFee : 0;
+  const total = subtotal + shipping;
 
   const value: CartContextType = {
     items,
@@ -91,6 +96,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     clear,
     count,
     subtotal,
+    shipping,
+    total,
     detailed,
     ready,
   };

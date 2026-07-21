@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { site } from '@/lib/site';
+import { QRCodeSVG } from 'qrcode.react';
+import { site, upiLink } from '@/lib/site';
+import { formatINR } from '@/lib/format';
 
-export default function PaymentInfo() {
+export default function PaymentInfo({ amount = 0 }: { amount?: number }) {
   const [copied, setCopied] = useState(false);
-  const [qrOk, setQrOk] = useState(true);
 
   function copyUpi() {
     navigator.clipboard?.writeText(site.upiId).then(() => {
@@ -40,6 +41,12 @@ export default function PaymentInfo() {
             <dt className="text-neutral-500">GPay / Phone</dt>
             <dd className="font-semibold text-neutral-800">{site.gpayNumber}</dd>
           </div>
+          {amount > 0 && (
+            <div>
+              <dt className="text-neutral-500">Amount to pay</dt>
+              <dd className="text-lg font-bold text-denim-800">{formatINR(amount)}</dd>
+            </div>
+          )}
         </dl>
         <p className="mt-4 rounded-lg bg-mist-100 p-3 text-xs text-neutral-600">
           After paying, please share the payment screenshot on WhatsApp so we can confirm and
@@ -47,29 +54,28 @@ export default function PaymentInfo() {
         </p>
       </div>
 
-      {/* QR code */}
+      {/* Generated UPI QR code */}
       <div className="flex flex-col items-center rounded-2xl border border-mist-200 bg-white p-6 text-center">
-        <h3 className="font-serif text-xl font-semibold text-denim-800">Scan & Pay</h3>
-        <div className="mt-4 flex h-56 w-56 items-center justify-center overflow-hidden rounded-xl border border-mist-200 bg-mist-50">
-          {qrOk ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={site.qrImage}
-              alt="UPI QR code"
-              className="h-full w-full object-contain"
-              onError={() => setQrOk(false)}
-            />
-          ) : (
-            <div className="p-4 text-xs text-neutral-400">
-              <p className="mb-2 text-3xl">▢</p>
-              Add your QR image at
-              <br />
-              <code className="text-[11px]">/public/payment/qr.png</code>
-            </div>
-          )}
+        <h3 className="font-serif text-xl font-semibold text-denim-800">Scan &amp; Pay</h3>
+        <div className="mt-4 rounded-xl border border-mist-200 bg-white p-3">
+          <QRCodeSVG
+            value={upiLink(amount)}
+            size={200}
+            level="M"
+            marginSize={2}
+            fgColor="#2f3547"
+            bgColor="#ffffff"
+          />
         </div>
-        <p className="mt-3 text-xs text-neutral-500">
-          Scan with any UPI app (GPay, PhonePe, Paytm) to pay {site.upiPayeeName}.
+        {amount > 0 ? (
+          <p className="mt-3 text-sm font-semibold text-denim-800">
+            Pay {formatINR(amount)} to {site.upiPayeeName}
+          </p>
+        ) : (
+          <p className="mt-3 text-sm text-neutral-500">Add items to your cart to load the amount.</p>
+        )}
+        <p className="mt-1 text-xs text-neutral-500">
+          Scan with any UPI app (GPay, PhonePe, Paytm) — the amount is filled in automatically.
         </p>
       </div>
     </div>

@@ -7,7 +7,7 @@ import { formatINR } from '@/lib/format';
 import { site, waLink } from '@/lib/site';
 
 export default function CartPage() {
-  const { detailed, subtotal, setQty, remove, count, ready } = useCart();
+  const { detailed, subtotal, shipping, total, setQty, remove, count, ready } = useCart();
 
   const message =
     `Hello ${site.name}! 🌸\n\nI'd like to order:\n` +
@@ -15,7 +15,9 @@ export default function CartPage() {
       .map((i) => `• ${i.name} (Qty: ${i.qty}) — ${formatINR(i.price * i.qty)}`)
       .join('\n') +
     `\n\nSubtotal: ${formatINR(subtotal)}` +
-    `\n\nPlease confirm availability, shipping and payment details.`;
+    `\nShipping: ${formatINR(shipping)}` +
+    `\nTotal: ${formatINR(total)}` +
+    `\n\nPlease confirm availability and share payment details.`;
 
   if (!ready) {
     return <div className="container-page py-20 text-center text-neutral-500">Loading cart…</div>;
@@ -99,12 +101,12 @@ export default function CartPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-neutral-500">Shipping</span>
-              <span className="text-neutral-500">Confirmed on WhatsApp</span>
+              <span className="font-semibold">{formatINR(shipping)}</span>
             </div>
           </div>
           <div className="mt-4 flex justify-between border-t border-mist-200 pt-4 text-lg font-bold text-denim-800">
             <span>Total</span>
-            <span>{formatINR(subtotal)}+</span>
+            <span>{formatINR(total)}</span>
           </div>
           <p className="mt-1 text-xs text-neutral-500">{site.shippingNote}</p>
 

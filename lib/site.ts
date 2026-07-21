@@ -22,12 +22,25 @@ export const site = {
   upiId: 'anupapmnm@oksbi',
   gpayNumber: '+91 87140 51245',
   upiPayeeName: 'Maitra Jewellery',
-  // QR code image lives at /public/payment/qr.png — replace with your own.
-  qrImage: '/payment/qr.png',
+  // Flat shipping charge (₹) added to every order.
+  shippingFee: 60,
+  // Promo banner shown site-wide at the very top.
+  announcement: 'Flat 25% off our 1st Anniversary! Offer valid till August 2nd — grab yours now!',
   // Policy
-  shippingNote:
-    'Shipping charges are extra and will be confirmed when you place your order on WhatsApp.',
+  shippingNote: 'Flat ₹60 shipping charge applies to all orders across India.',
 };
+
+// Build a UPI deep-link (upi://pay?...) — used to generate the payment QR code.
+export function upiLink(amount?: number) {
+  const params = new URLSearchParams({
+    pa: site.upiId,
+    pn: site.upiPayeeName,
+    cu: 'INR',
+    tn: `${site.name} order`,
+  });
+  if (amount && amount > 0) params.set('am', String(amount));
+  return `upi://pay?${params.toString()}`;
+}
 
 export function waLink(message: string) {
   return `https://wa.me/${site.whatsappNumber}?text=${encodeURIComponent(message)}`;
