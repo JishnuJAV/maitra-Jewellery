@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-script: 'Dancing Script', cursive;
+}
+
+body {
+  @apply bg-mist-50 text-neutral-800 antialiased;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-denim-600 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white transition-colors hover:bg-denim-700 disabled:opacity-60;
+  }
+  .btn-whatsapp {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1ebe5a];
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-denim-300 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-denim-700 transition-colors hover:bg-denim-50;
+  }
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+  .section-title {
+    @apply font-serif text-3xl font-semibold text-denim-800 sm:text-4xl;
+  }
+}
