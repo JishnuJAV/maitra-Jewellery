@@ -19,11 +19,25 @@ const script = Dancing_Script({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(site.siteUrl),
   title: {
     default: `${site.name} — ${site.tagline}`,
     template: `%s — ${site.name}`,
   },
   description: site.description,
+  openGraph: {
+    type: 'website',
+    siteName: site.name,
+    title: site.ogTitle,
+    description: site.ogDescription,
+    url: site.siteUrl,
+    locale: 'en_IN',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: site.ogTitle,
+    description: site.ogDescription,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -5,12 +5,13 @@ import ProductCard from '@/components/ProductCard';
 
 export const metadata: Metadata = { title: 'Shop All Jewellery' };
 
-export default function ProductsPage({
+export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: { category?: string };
+  searchParams: Promise<{ category?: string }>;
 }) {
-  const active = searchParams.category as Category | undefined;
+  const { category } = await searchParams;
+  const active = category as Category | undefined;
   const activeCat = categories.find((c) => c.id === active);
   const list = active ? products.filter((p) => p.category === active) : products;
 
