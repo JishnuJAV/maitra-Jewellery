@@ -258,7 +258,7 @@ export const products: Product[] = [
     category: 'micro-gold',
     price: 1689,
     images: [
-      '/products/lakshmi-kaasu-maala-1.jpg',
+      '/products/lakshmi-kaasu-maala-1.jpeg',
       '/products/lakshmi-kaasu-maala-2.jpg',
       '/products/lakshmi-kaasu-maala-3.jpg',
     ],
