@@ -2,7 +2,8 @@ export type Category =
   | 'kemp-palakka'
   | 'antique-temple'
   | 'american-diamond'
-  | 'micro-gold';
+  | 'micro-gold'
+  | 'earrings';
 
 export type Product = {
   slug: string;
@@ -36,6 +37,11 @@ export const categories: { id: Category; label: string; blurb: string }[] = [
     id: 'micro-gold',
     label: 'Micro Gold Plated',
     blurb: 'Long lasting micro gold plated kaasu malas and harams.',
+  },
+  {
+    id: 'earrings',
+    label: 'Earrings & Jhumkas',
+    blurb: 'Temple jhumkas, ear hangings and stone-drop earrings.',
   },
 ];
 
@@ -203,6 +209,83 @@ export const products: Product[] = [
       'A regal long haram in micro gold plating, lined with Lakshmi kaasu coins and ruby accents. The ultimate traditional piece for weddings and grand occasions.',
     highlights: ['Micro gold plated', 'Full Lakshmi coin haram', 'Long, bridal length'],
     featured: true,
+  },
+  {
+    slug: 'ganapathi-idol-jhumka',
+    name: 'Premium Ganapathi Idol Jhumka',
+    category: 'earrings',
+    price: 444,
+    images: ['/products/ganapathi-jhumka-1.jpg', '/products/ganapathi-jhumka-2.jpg'],
+    description:
+      'Statement antique-gold jhumkas crowned with a detailed Lord Ganapathi idol, finished with an intricately embossed dome and a fringe of white pearl drops. A divine, temple-style pick for festive and traditional wear.',
+    highlights: ['Ganapathi idol top', 'Embossed antique gold dome', 'White pearl drop fringe'],
+    featured: true,
+  },
+  {
+    slug: 'ruby-stone-jhumka',
+    name: 'Premium Ruby Stone Jhumka',
+    category: 'earrings',
+    price: 399,
+    images: ['/products/ruby-stone-jhumka-1.jpg', '/products/ruby-stone-jhumka-2.jpg'],
+    description:
+      'Elegant antique-gold jhumkas set with a deep ruby-red stone at the top and finished with a cascade of faceted ruby bead drops. A rich, classic accent that pairs beautifully with silk sarees and traditional outfits.',
+    highlights: ['Ruby red stone top', 'Antique gold jhumka dome', 'Faceted ruby bead drops'],
+    featured: true,
+  },
+  {
+    slug: 'layered-floral-swirl-ear-hangings',
+    name: 'Layered Floral Swirl Ear Hangings',
+    category: 'earrings',
+    price: 399,
+    images: ['/products/floral-swirl-hangings-1.jpg'],
+    description:
+      'Long gold-tone ear hangings with a sparkling CZ flower stud and a tiered, open swirl cage, finished with white pearl drops. Lightweight and eye-catching for parties and receptions.',
+    highlights: ['CZ flower stud top', 'Tiered swirl cage design', 'White pearl drops'],
+  },
+  {
+    slug: 'lakshmi-idol-kaasu-jhumka',
+    name: 'Lakshmi Idol Kaasu Jhumka',
+    category: 'earrings',
+    price: 719,
+    images: ['/products/lakshmi-idol-jhumka-1.jpg'],
+    description:
+      'Micro gold plated jhumkas featuring a Lakshmi kaasu (coin) stud and a coin-lined dome with red stone accents, finished with a row of gold spike drops. Traditional temple charm with durable, long-lasting plating.',
+    highlights: ['Micro gold plated', 'Lakshmi kaasu coin design', 'Gold spike drop fringe'],
+  },
+  {
+    slug: 'lakshmi-kaasu-maala-pink-stone',
+    name: 'Traditional Lakshmi Kaasu Maala — Pink Stone',
+    category: 'micro-gold',
+    price: 1689,
+    images: [
+      '/products/lakshmi-kaasu-maala-1.jpg',
+      '/products/lakshmi-kaasu-maala-2.jpg',
+      '/products/lakshmi-kaasu-maala-3.jpg',
+    ],
+    description:
+      'A traditional micro gold plated kaasu maala lined with detailed Lakshmi coins and connected by pink kemp stone links. A graceful, heritage-length necklace that adds grandeur to silk sarees and bridal looks.',
+    highlights: ['Micro gold plated', 'Full Lakshmi kaasu coins', 'Pink stone links'],
+    featured: true,
+  },
+  {
+    slug: 'single-layer-traditional-elakkathali',
+    name: 'Single Layer Traditional Elakkathali',
+    category: 'micro-gold',
+    price: 1679,
+    images: ['/products/single-layer-elakkathali-1.jpg', '/products/single-layer-elakkathali-2.jpg'],
+    description:
+      'A classic Kerala-style elakkathali choker in rich micro gold plating, woven from fine gold beads and leaf motifs into a single dense layer. Comes with matching earrings — a timeless traditional staple.',
+    highlights: ['Micro gold plated', 'Traditional elakkathali weave', 'Matching earrings included'],
+  },
+  {
+    slug: 'emerald-bead-elakkathali',
+    name: 'Emerald Bead Elakkathali Choker',
+    category: 'micro-gold',
+    price: 1459,
+    images: ['/products/emerald-elakkathali-1.jpg', '/products/emerald-elakkathali-2.jpg'],
+    description:
+      'A micro gold plated elakkathali choker bordered with emerald-green bead hangings and a green stone centrepiece. The gold leaf detailing and coloured bead fringe make it a fresh take on a traditional favourite.',
+    highlights: ['Micro gold plated', 'Emerald green bead hangings', 'Green stone centre'],
   },
 ];
 

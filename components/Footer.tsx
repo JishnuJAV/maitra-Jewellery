@@ -19,6 +19,7 @@ export default function Footer() {
             <li><Link href="/products?category=antique-temple" className="hover:text-white">Antique & Temple</Link></li>
             <li><Link href="/products?category=american-diamond" className="hover:text-white">American Diamond</Link></li>
             <li><Link href="/products?category=micro-gold" className="hover:text-white">Micro Gold Plated</Link></li>
+            <li><Link href="/products?category=earrings" className="hover:text-white">Earrings & Jhumkas</Link></li>
           </ul>
         </div>
 
