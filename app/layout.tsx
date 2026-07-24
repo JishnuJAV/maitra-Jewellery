@@ -6,6 +6,7 @@ import { CartProvider } from '@/components/CartProvider';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import AnnouncementBar from '@/components/AnnouncementBar';
+import CartDrawer from '@/components/CartDrawer';
 
 const serif = Cormorant_Garamond({
   subsets: ['latin'],
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Header />
           <main className="min-h-[60vh]">{children}</main>
           <Footer />
+          <CartDrawer />
         </CartProvider>
       </body>
     </html>

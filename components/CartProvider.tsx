@@ -25,6 +25,10 @@ type CartContextType = {
   total: number;
   detailed: { slug: string; qty: number; name: string; price: number; image: string }[];
   ready: boolean;
+  // Slide-out drawer control
+  isOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
 };
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -33,6 +37,10 @@ const STORAGE_KEY = 'maitra-cart';
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openCart = () => setIsOpen(true);
+  const closeCart = () => setIsOpen(false);
 
   useEffect(() => {
     try {
@@ -43,6 +51,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
     setReady(true);
   }, []);
+
+  // Lock body scroll while the drawer is open
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  // Close the drawer with the Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen]);
 
   useEffect(() => {
     if (ready) localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
@@ -100,6 +126,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     total,
     detailed,
     ready,
+    isOpen,
+    openCart,
+    closeCart,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

@@ -7,7 +7,7 @@ import { site } from '@/lib/site';
 import { categories } from '@/lib/products';
 
 export default function Header() {
-  const { count } = useCart();
+  const { count, openCart } = useCart();
   const [open, setOpen] = useState(false);
 
   const nav = [
@@ -57,7 +57,11 @@ export default function Header() {
           ))}
         </nav>
 
-        <Link href="/cart" className="relative flex items-center gap-1 text-denim-800" aria-label="Cart">
+        <button
+          onClick={openCart}
+          className="relative flex items-center gap-1 text-denim-800 transition-transform hover:scale-105"
+          aria-label={`Cart${count > 0 ? ` (${count} items)` : ''}`}
+        >
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
             <path d="M6 6h15l-1.5 9h-12z" strokeLinejoin="round" />
             <path d="M6 6 5 3H2" strokeLinecap="round" />
@@ -65,11 +69,14 @@ export default function Header() {
             <circle cx="18" cy="20" r="1.4" />
           </svg>
           {count > 0 && (
-            <span className="absolute -right-2 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-denim-700 px-1 text-[11px] font-bold text-white">
+            <span
+              key={count}
+              className="animate-pop-in absolute -right-2 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gradient-to-r from-denim-600 to-sky-500 px-1 text-[11px] font-bold text-white shadow-sm"
+            >
               {count}
             </span>
           )}
-        </Link>
+        </button>
       </div>
 
       {open && (

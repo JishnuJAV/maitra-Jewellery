@@ -104,9 +104,9 @@ export default function CartPage() {
               <span className="font-semibold">{formatINR(shipping)}</span>
             </div>
           </div>
-          <div className="mt-4 flex justify-between border-t border-mist-200 pt-4 text-lg font-bold text-denim-800">
-            <span>Total</span>
-            <span>{formatINR(total)}</span>
+          <div className="mt-4 flex items-center justify-between border-t border-mist-200 pt-4">
+            <span className="text-lg font-bold text-denim-800">Total</span>
+            <span className="font-serif text-2xl font-bold text-gradient">{formatINR(total)}</span>
           </div>
           <p className="mt-1 text-xs text-neutral-500">{site.shippingNote}</p>
 

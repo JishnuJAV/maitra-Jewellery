@@ -16,51 +16,83 @@ export default async function ProductsPage({
   const list = active ? products.filter((p) => p.category === active) : products;
 
   return (
-    <div className="container-page py-12">
-      <div className="mb-8 text-center">
-        <h1 className="section-title">{activeCat ? activeCat.label : 'All Jewellery'}</h1>
-        <p className="mt-2 text-neutral-500">
-          {activeCat ? activeCat.blurb : 'Explore our full handcrafted collection.'}
+    <div>
+      {/* Gradient hero band */}
+      <div className="border-b border-mist-200 bg-gradient-to-b from-mist-100 to-mist-50">
+        <div className="container-page py-10 text-center sm:py-14">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-600">
+            Maitra Collection
+          </p>
+          <h1 className="mt-2 font-serif text-4xl font-bold sm:text-5xl">
+            <span className="text-gradient">{activeCat ? activeCat.label : 'All Jewellery'}</span>
+          </h1>
+          <p className="mx-auto mt-3 max-w-xl text-neutral-500">
+            {activeCat ? activeCat.blurb : 'Explore our full handcrafted collection.'}
+          </p>
+        </div>
+      </div>
+
+      <div className="container-page py-10">
+        {/* Filter pills with counts */}
+        <div className="mb-8 flex flex-wrap justify-center gap-2.5 sm:gap-3">
+          <FilterPill href="/products" label="All" count={products.length} active={!active} />
+          {categories.map((c) => (
+            <FilterPill
+              key={c.id}
+              href={`/products?category=${c.id}`}
+              label={c.label}
+              count={products.filter((p) => p.category === c.id).length}
+              active={active === c.id}
+            />
+          ))}
+        </div>
+
+        <p className="mb-6 text-center text-sm text-neutral-400">
+          {list.length} {list.length === 1 ? 'piece' : 'pieces'}
         </p>
-      </div>
 
-      {/* Filter pills */}
-      <div className="mb-10 flex flex-wrap justify-center gap-3">
-        <FilterPill href="/products" label="All" active={!active} />
-        {categories.map((c) => (
-          <FilterPill
-            key={c.id}
-            href={`/products?category=${c.id}`}
-            label={c.label}
-            active={active === c.id}
-          />
-        ))}
-      </div>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
+          {list.map((p) => (
+            <ProductCard key={p.slug} product={p} />
+          ))}
+        </div>
 
-      <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
-        {list.map((p) => (
-          <ProductCard key={p.slug} product={p} />
-        ))}
+        {list.length === 0 && (
+          <p className="py-16 text-center text-neutral-500">No products in this category yet.</p>
+        )}
       </div>
-
-      {list.length === 0 && (
-        <p className="py-16 text-center text-neutral-500">No products in this category yet.</p>
-      )}
     </div>
   );
 }
 
-function FilterPill({ href, label, active }: { href: string; label: string; active: boolean }) {
+function FilterPill({
+  href,
+  label,
+  count,
+  active,
+}: {
+  href: string;
+  label: string;
+  count: number;
+  active: boolean;
+}) {
   return (
     <Link
       href={href}
-      className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+      className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
         active
-          ? 'border-denim-700 bg-denim-700 text-white'
-          : 'border-mist-300 bg-white text-neutral-700 hover:bg-mist-100'
+          ? 'border-transparent bg-gradient-to-r from-denim-700 to-sky-500 text-white shadow-sm shadow-denim-500/25'
+          : 'border-mist-300 bg-white text-neutral-700 hover:border-denim-300 hover:bg-mist-100'
       }`}
     >
       {label}
+      <span
+        className={`rounded-full px-1.5 text-[11px] font-semibold ${
+          active ? 'bg-white/25 text-white' : 'bg-mist-100 text-neutral-500'
+        }`}
+      >
+        {count}
+      </span>
     </Link>
   );
 }

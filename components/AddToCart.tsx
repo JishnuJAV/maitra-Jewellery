@@ -1,21 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useCart } from '@/components/CartProvider';
 import { site, waLink } from '@/lib/site';
 import { formatINR } from '@/lib/format';
 import type { Product } from '@/lib/products';
 
 export default function AddToCart({ product }: { product: Product }) {
-  const { add } = useCart();
-  const router = useRouter();
+  const { add, openCart } = useCart();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
   function handleAdd() {
     add(product.slug, qty);
     setAdded(true);
+    openCart();
     setTimeout(() => setAdded(false), 1800);
   }
 
@@ -58,7 +57,7 @@ export default function AddToCart({ product }: { product: Product }) {
         <button
           onClick={() => {
             add(product.slug, qty);
-            router.push('/cart');
+            openCart();
           }}
           className="btn-primary flex-1"
         >
