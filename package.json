@@ -1,6 +1,6 @@
 {
   "name": "maitrajewellery",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "16.2.10",
+    "next": "^16.2.12",
     "qrcode.react": "4.2.0",
     "react": "19.2.7",
     "react-dom": "19.2.7"
