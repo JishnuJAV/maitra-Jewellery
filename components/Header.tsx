@@ -19,7 +19,13 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-mist-200 bg-mist-50/95 backdrop-blur">
-      <div className="container-page flex items-center gap-3 py-3 sm:gap-4">
+      {/*
+        Deliberately NOT `container-page`. That caps at max-w-6xl (1152px), but
+        the logo + eight nav items + cart need ~1175px, so the nav could never
+        fit and overflowed — clipping "Shop All" and "Contact" at both edges.
+        The header gets its own wider container; page content keeps max-w-6xl.
+      */}
+      <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6">
         <button
           className="shrink-0 xl:hidden"
           aria-label="Menu"
@@ -53,18 +59,18 @@ export default function Header() {
         </Link>
 
         {/*
-          Desktop nav appears at xl (1280px), not lg (1024px). These eight items
-          need roughly 1140px alongside the logo and cart, so showing them at
-          1024px is what forced the labels to wrap onto two lines. Below xl the
-          hamburger takes over.
+          Desktop nav appears at xl (1280px), not lg (1024px): eight items plus
+          the logo and cart need ~1175px, so showing them at 1024px is what made
+          the labels wrap onto two lines.
 
-          `whitespace-nowrap` is the other half of the fix: without it a label
-          like "Shop All" breaks at the space regardless of available width.
+          `whitespace-nowrap` stops a label like "Shop All" breaking at its space.
 
-          The overflow-x fallback only matters if a very long category name is
-          added later — it scrolls instead of breaking the header.
+          Aligned to the START, not centred. Centring an overflowing flex item
+          clips it at BOTH ends, which is what hid the "S" of "Shop All" and the
+          "ct" of "Contact". Left-aligned, overflow can only ever fall off one
+          edge — and with the wider container it does not overflow at all.
         */}
-        <nav className="no-scrollbar hidden min-w-0 flex-1 items-center justify-center gap-5 overflow-x-auto xl:flex 2xl:gap-7">
+        <nav className="no-scrollbar hidden min-w-0 flex-1 items-center gap-4 overflow-x-auto xl:flex 2xl:gap-6">
           {nav.map((n) => (
             <Link
               key={n.label}
