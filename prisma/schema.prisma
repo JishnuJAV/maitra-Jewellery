@@ -1,0 +1,283 @@
+// Maitra Jewellery — data model
+// Postgres (Supabase). All money values are whole rupees (INR), stored as Int.
+
+// Pinned to Prisma 6.19 for Cloudflare Workers: Prisma 7 compiles its query
+// compiler WASM at runtime, which Workers forbid ("Wasm code generation
+// disallowed by embedder"). See https://github.com/prisma/prisma/issues/28657
+//
+// No custom `output` — the default node_modules location is what
+// @opennextjs/cloudflare knows how to patch when bundling the Worker.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Pooled connection (Supabase pgBouncer, port 6543) used by the app.
+  url = env("DATABASE_URL")
+  // Direct connection (port 5432) — migrations can't run through the pooler.
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Catalogue
+// ---------------------------------------------------------------------------
+
+model Category {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  label     String
+  blurb     String    @default("")
+  imageUrl  String?
+  sortOrder Int       @default(0)
+  active    Boolean   @default(true)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([active, sortOrder])
+}
+
+model Product {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  name        String
+  description String         @default("")
+  /// Selling price in whole rupees.
+  price       Int
+  /// Original / MRP price, used to render a strike-through discount.
+  compareAt   Int?
+  highlights  String[]       @default([])
+  featured    Boolean        @default(false)
+  active      Boolean        @default(true)
+  /// null = stock not tracked for this product.
+  stock       Int?
+  sortOrder   Int            @default(0)
+  categoryId  String?
+  category    Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  media       ProductMedia[]
+  orderItems  OrderItem[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([categoryId, active])
+  @@index([featured, active])
+  @@index([active, sortOrder])
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+model ProductMedia {
+  id        String    @id @default(cuid())
+  productId String
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type      MediaType @default(IMAGE)
+  url       String
+  /// Cloudinary public_id — kept so the asset can be deleted when the media row is.
+  publicId  String?
+  /// Poster frame for videos; auto-derived from Cloudinary.
+  posterUrl String?
+  alt       String?
+  width     Int?
+  height    Int?
+  /// Display order within the product gallery (0 = primary image).
+  position  Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  @@index([productId, position])
+}
+
+// ---------------------------------------------------------------------------
+// Customers & authentication
+// ---------------------------------------------------------------------------
+
+model Customer {
+  id          String    @id @default(cuid())
+  /// 10-digit Indian mobile number, normalised (no +91 prefix).
+  phone       String    @unique
+  name        String?
+  email       String?
+  blocked     Boolean   @default(false)
+  orders      Order[]
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+/// Short-lived one-time passcodes. The code itself is never stored — only a hash.
+model OtpCode {
+  id         String    @id @default(cuid())
+  phone      String
+  codeHash   String
+  expiresAt  DateTime
+  attempts   Int       @default(0)
+  consumedAt DateTime?
+  /// Hashed request IP, for abuse tracing without storing raw IPs.
+  ipHash     String?
+  createdAt  DateTime  @default(now())
+
+  @@index([phone, createdAt])
+  @@index([expiresAt])
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  /// Login identifier. Not necessarily an email (e.g. "maitra@admin").
+  username     String    @unique
+  passwordHash String
+  name         String?
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Orders
+// ---------------------------------------------------------------------------
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PACKED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  AWAITING_CONFIRMATION
+  PAID
+  REFUNDED
+}
+
+model Order {
+  id          String        @id @default(cuid())
+  /// Human-friendly reference shown to the customer, e.g. "MJ-2607-0042".
+  orderNumber String        @unique
+  customerId  String?
+  customer    Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  customerName String
+  phone        String
+  email        String?
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  pincode      String
+
+  items       OrderItem[]
+  subtotal    Int
+  shippingFee Int           @default(0)
+  discount    Int           @default(0)
+  total       Int
+
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(UNPAID)
+  paymentRef    String?
+
+  /// Which shipping rule produced shippingFee, kept for auditing.
+  shippingRateName String?
+  customerNote     String?
+  adminNote        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([createdAt])
+  @@index([phone])
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  /// Nulled if the product is later deleted — the snapshot fields below survive.
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  // Snapshot of the product at purchase time, so historical orders stay accurate
+  // even after the catalogue changes.
+  slug      String
+  name      String
+  price     Int
+  qty       Int
+  imageUrl  String?
+  lineTotal Int
+
+  @@index([orderId])
+}
+
+// ---------------------------------------------------------------------------
+// Shipping
+// ---------------------------------------------------------------------------
+
+/// Region-based delivery charges, editable from the admin dashboard.
+/// Matching is most-specific-first: pincode prefix, then state, then the default rule.
+model ShippingRate {
+  id   String @id @default(cuid())
+  name String
+  /// Charge in whole rupees.
+  fee  Int    @default(0)
+  /// Order subtotal at or above which shipping becomes free. null = never free.
+  freeAbove Int?
+  /// State names this rule covers (case-insensitive match).
+  states          String[] @default([])
+  /// Pincode prefixes this rule covers, e.g. ["67", "68"] for most of Kerala.
+  pincodePrefixes String[] @default([])
+  /// Fallback rule applied when nothing else matches. Exactly one should be true.
+  isDefault Boolean @default(false)
+  active    Boolean @default(true)
+  sortOrder Int     @default(0)
+  /// Delivery estimate shown at checkout, e.g. "3-5 days".
+  etaDays   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}
+
+// ---------------------------------------------------------------------------
+// Settings & analytics
+// ---------------------------------------------------------------------------
+
+/// Sliding-window rate limiting. Kept in Postgres rather than memory because
+/// serverless instances don't share state — an in-memory counter would reset on
+/// every cold start and let an attacker bypass the limit by forcing new instances.
+model RateLimitHit {
+  id        String   @id @default(cuid())
+  /// Namespaced key, e.g. "admin-login:<ipHash>" or "otp-send:<phone>".
+  bucket    String
+  createdAt DateTime @default(now())
+
+  @@index([bucket, createdAt])
+}
+
+/// Key/value store for editable site content (announcement bar, UPI details, …).
+model SiteSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model PageView {
+  id   String @id @default(cuid())
+  path String
+  /// Random per-browser-session id from a cookie — counts sessions.
+  sessionId String
+  /// Salted hash of IP + user agent — counts unique visitors without storing PII.
+  visitorHash String
+  referrer    String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([visitorHash, createdAt])
+  @@index([sessionId])
+  @@index([path, createdAt])
+}

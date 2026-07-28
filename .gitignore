@@ -5,7 +5,28 @@
 .DS_Store
 *.pem
 npm-debug.log*
-.env*.local
 .vercel
+
+# Environment files — never commit real secrets.
+# .env.example is the only one that may be checked in.
+.env
+.env.local
+.env*.local
+.env.development
+.env.production
+!.env.example
+# Wrangler's local secrets file — same rule as .env.local.
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# Generated / build artefacts
 next-env.d.ts
+*.tsbuildinfo
 .tsbuildinfo
+/lib/generated
+
+# Cloudflare / OpenNext build output
+/.open-next
+/.wrangler
+cloudflare-env.d.ts

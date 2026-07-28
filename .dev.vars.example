@@ -1,0 +1,25 @@
+# Wrangler reads this file for `npm run cf:preview` (local Worker runtime).
+# Copy to `.dev.vars` and fill in. Same values as .env.local.
+# `.dev.vars` is gitignored — never commit real secrets.
+#
+# NOTE: NEXT_PUBLIC_* values are inlined at BUILD time, not read from here.
+# Set those in .env.local (local) and as build-time variables in the
+# Cloudflare dashboard (deployed).
+
+DATABASE_URL="postgresql://postgres.PROJECTREF:PASSWORD@aws-0-REGION.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+DIRECT_URL="postgresql://postgres.PROJECTREF:PASSWORD@aws-0-REGION.pooler.supabase.com:5432/postgres"
+
+AUTH_SECRET=""
+ANALYTICS_SALT=""
+
+ADMIN_USERNAME="maitra@admin"
+ADMIN_PASSWORD=""
+
+CLOUDINARY_CLOUD_NAME=""
+CLOUDINARY_API_KEY=""
+CLOUDINARY_API_SECRET=""
+
+OTP_PROVIDER="msg91"
+MSG91_AUTH_KEY=""
+MSG91_TEMPLATE_ID=""
+MSG91_SENDER_ID=""

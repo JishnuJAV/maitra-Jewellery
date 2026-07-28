@@ -4,17 +4,26 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useCart } from '@/components/CartProvider';
 import { site } from '@/lib/site';
-import { categories } from '@/lib/products';
 
-export default function Header() {
+export type HeaderCategory = { slug: string; label: string };
+
+/**
+ * Categories are passed in from the server layout rather than imported — the
+ * catalogue lives in the database now, and this is a Client Component.
+ */
+export default function Header({ categories = [] }: { categories?: HeaderCategory[] }) {
   const { count, openCart } = useCart();
   const [open, setOpen] = useState(false);
 
   const nav = [
     { href: '/products', label: 'Shop All' },
-    ...categories.map((c) => ({ href: `/products?category=${c.id}`, label: c.label })),
+    ...categories.map((category) => ({
+      href: `/products?category=${category.slug}`,
+      label: category.label,
+    })),
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },
+    { href: '/account', label: 'My Orders' },
   ];
 
   return (

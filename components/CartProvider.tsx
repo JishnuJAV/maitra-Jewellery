@@ -2,16 +2,36 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from 'react';
-import { products } from '@/lib/products';
-import { site } from '@/lib/site';
+import {
+  addItem,
+  clearItems,
+  getServerSnapshot,
+  getSnapshot,
+  hydration,
+  removeItem,
+  setItemQty,
+  subscribe,
+  type CartItem,
+} from '@/lib/cart-store';
 
-export type CartItem = { slug: string; qty: number };
+export type { CartItem };
+
+export type CartLine = {
+  slug: string;
+  qty: number;
+  name: string;
+  price: number;
+  image: string | null;
+  stock: number | null;
+};
 
 type CartContextType = {
   items: CartItem[];
@@ -21,38 +41,47 @@ type CartContextType = {
   clear: () => void;
   count: number;
   subtotal: number;
-  shipping: number;
-  total: number;
-  detailed: { slug: string; qty: number; name: string; price: number; image: string }[];
+  detailed: CartLine[];
+  /** False during server render and until hydration completes. */
   ready: boolean;
-  // Slide-out drawer control
+  /** True while prices are being resolved from the server. */
+  loading: boolean;
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
 };
 
 const CartContext = createContext<CartContextType | null>(null);
-const STORAGE_KEY = 'maitra-cart';
 
+/**
+ * Cart state.
+ *
+ * The cart itself lives in an external localStorage-backed store (lib/cart-store)
+ * and is read through `useSyncExternalStore`, so nothing is copied into state
+ * inside an effect.
+ *
+ * The store holds only slugs and quantities. Names, prices and images are
+ * fetched from the server whenever the set of slugs changes, so the catalogue
+ * stays the single source of truth for pricing and a stale cart can't carry an
+ * old price into checkout. Shipping is deliberately absent — it depends on the
+ * delivery address and is quoted at checkout.
+ */
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [ready, setReady] = useState(false);
+  const items = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const ready = useSyncExternalStore(
+    hydration.subscribe,
+    hydration.getSnapshot,
+    hydration.getServerSnapshot,
+  );
+
+  const [lines, setLines] = useState<Omit<CartLine, 'qty'>[]>([]);
+  /** Which slug set `lines` corresponds to; drives the derived loading flag. */
+  const [loadedKey, setLoadedKey] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
-  const openCart = () => setIsOpen(true);
-  const closeCart = () => setIsOpen(false);
+  const openCart = useCallback(() => setIsOpen(true), []);
+  const closeCart = useCallback(() => setIsOpen(false), []);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw));
-    } catch {
-      /* ignore */
-    }
-    setReady(true);
-  }, []);
-
-  // Lock body scroll while the drawer is open
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => {
@@ -60,72 +89,78 @@ export function CartProvider({ children }: { children: ReactNode }) {
     };
   }, [isOpen]);
 
-  // Close the drawer with the Escape key
   useEffect(() => {
     if (!isOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsOpen(false);
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen]);
 
-  useEffect(() => {
-    if (ready) localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items, ready]);
-
-  function add(slug: string, qty = 1) {
-    setItems((prev) => {
-      const existing = prev.find((i) => i.slug === slug);
-      if (existing) {
-        return prev.map((i) => (i.slug === slug ? { ...i, qty: i.qty + qty } : i));
-      }
-      return [...prev, { slug, qty }];
-    });
-  }
-
-  function remove(slug: string) {
-    setItems((prev) => prev.filter((i) => i.slug !== slug));
-  }
-
-  function setQty(slug: string, qty: number) {
-    if (qty <= 0) return remove(slug);
-    setItems((prev) => prev.map((i) => (i.slug === slug ? { ...i, qty } : i)));
-  }
-
-  function clear() {
-    setItems([]);
-  }
-
-  const detailed = useMemo(
+  const slugKey = useMemo(
     () =>
       items
-        .map((i) => {
-          const p = products.find((prod) => prod.slug === i.slug);
-          if (!p) return null;
-          return { slug: i.slug, qty: i.qty, name: p.name, price: p.price, image: p.images[0] };
-        })
-        .filter(Boolean) as CartContextType['detailed'],
-    [items]
+        .map((item) => item.slug)
+        .sort()
+        .join(','),
+    [items],
   );
 
-  const count = items.reduce((n, i) => n + i.qty, 0);
-  const subtotal = detailed.reduce((n, i) => n + i.price * i.qty, 0);
-  const shipping = count > 0 ? site.shippingFee : 0;
-  const total = subtotal + shipping;
+  // Re-resolve product details whenever the set of slugs changes.
+  useEffect(() => {
+    if (!ready || slugKey === '') return;
+
+    const controller = new AbortController();
+
+    fetch('/api/products/lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slugs: slugKey.split(',') }),
+      signal: controller.signal,
+    })
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error('lookup'))))
+      .then((body: { products: Omit<CartLine, 'qty'>[] }) => {
+        setLines(body.products);
+        setLoadedKey(slugKey);
+      })
+      .catch(() => {
+        // Keep the previous lines rather than emptying the cart on a transient
+        // network failure.
+      });
+
+    return () => controller.abort();
+  }, [slugKey, ready]);
+
+  // Derived rather than stored, so no setState runs in the effect body above.
+  const loading = ready && slugKey !== '' && loadedKey !== slugKey;
+
+  // Join quantities onto the server-resolved details. Products the server didn't
+  // return (deleted or hidden since) drop out of the cart automatically.
+  const detailed = useMemo<CartLine[]>(() => {
+    const bySlug = new Map(lines.map((line) => [line.slug, line]));
+    return items
+      .map((item) => {
+        const line = bySlug.get(item.slug);
+        return line ? { ...line, qty: item.qty } : null;
+      })
+      .filter((line): line is CartLine => line !== null);
+  }, [items, lines]);
+
+  const count = detailed.reduce((total, line) => total + line.qty, 0);
+  const subtotal = detailed.reduce((total, line) => total + line.price * line.qty, 0);
 
   const value: CartContextType = {
     items,
-    add,
-    remove,
-    setQty,
-    clear,
+    add: addItem,
+    remove: removeItem,
+    setQty: setItemQty,
+    clear: clearItems,
     count,
     subtotal,
-    shipping,
-    total,
     detailed,
     ready,
+    loading,
     isOpen,
     openCart,
     closeCart,
@@ -135,7 +170,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 }
 
 export function useCart() {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error('useCart must be used within CartProvider');
-  return ctx;
+  const context = useContext(CartContext);
+  if (!context) throw new Error('useCart must be used within CartProvider');
+  return context;
 }

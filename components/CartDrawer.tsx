@@ -12,8 +12,6 @@ export default function CartDrawer() {
     closeCart,
     detailed,
     subtotal,
-    shipping,
-    total,
     setQty,
     remove,
     count,
@@ -22,15 +20,14 @@ export default function CartDrawer() {
 
   if (!isOpen) return null;
 
+  // Delivery is priced from the address at checkout, so it isn't quoted here.
   const message =
     `Hello ${site.name}! 🌸\n\nI'd like to order:\n` +
     detailed
       .map((i) => `• ${i.name} (Qty: ${i.qty}) — ${formatINR(i.price * i.qty)}`)
       .join('\n') +
     `\n\nSubtotal: ${formatINR(subtotal)}` +
-    `\nShipping: ${formatINR(shipping)}` +
-    `\nTotal: ${formatINR(total)}` +
-    `\n\nPlease confirm availability and share payment details.`;
+    `\n\nPlease confirm availability, delivery charges and payment details.`;
 
   return (
     <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label="Shopping cart">
@@ -107,7 +104,15 @@ export default function CartDrawer() {
                     onClick={closeCart}
                     className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-mist-100"
                   >
-                    <Image src={item.image} alt={item.name} fill sizes="80px" className="object-cover" />
+                    {item.image && (
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        sizes="80px"
+                        className="object-cover"
+                      />
+                    )}
                   </Link>
                   <div className="flex flex-1 flex-col">
                     <div className="flex items-start justify-between gap-2">
@@ -164,42 +169,42 @@ export default function CartDrawer() {
                   <span className="font-semibold text-neutral-800">{formatINR(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-neutral-500">Shipping</span>
-                  <span className="font-semibold text-neutral-800">{formatINR(shipping)}</span>
+                  <span className="text-neutral-500">Delivery</span>
+                  <span className="text-neutral-500">Calculated at checkout</span>
                 </div>
               </div>
               <div className="mt-3 flex items-end justify-between border-t border-dashed border-mist-300 pt-3">
-                <span className="text-sm font-semibold uppercase tracking-wide text-neutral-500">Total</span>
-                <span className="font-serif text-2xl font-bold text-gradient">{formatINR(total)}</span>
+                <span className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+                  Subtotal
+                </span>
+                <span className="font-serif text-2xl font-bold text-gradient">
+                  {formatINR(subtotal)}
+                </span>
               </div>
-              <p className="mt-1 text-[11px] text-neutral-400">{site.shippingNote}</p>
+              <p className="mt-1 text-[11px] text-neutral-400">
+                Delivery charges depend on your PIN code.
+              </p>
 
+              <Link href="/checkout" onClick={closeCart} className="btn-primary mt-4 w-full">
+                Proceed to checkout
+              </Link>
               <a
                 href={waLink(message)}
                 target="_blank"
                 rel="noreferrer"
-                className="btn-whatsapp mt-4 w-full"
+                className="btn-whatsapp mt-2 w-full"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2a10 10 0 0 0-8.7 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.8 14.2c-.2.6-1.4 1.2-2 1.3-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5-4.5-.2-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.4.7-.4h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.3.3c-.1.1-.3.3-.1.6.1.3.7 1.1 1.4 1.8.9.8 1.7 1 2 1.2.3.1.5.1.6-.1l.6-.8c.2-.3.4-.2.6-.1l1.9.9c.2.1.4.2.5.3.1.2.1.7-.1 1.3Z" />
                 </svg>
-                Place order on WhatsApp
+                Ask on WhatsApp
               </a>
-              <div className="mt-2 flex items-center gap-2">
-                <Link
-                  href="/checkout"
-                  onClick={closeCart}
-                  className="flex-1 rounded-full border border-denim-200 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-denim-700 transition-colors hover:bg-denim-50"
-                >
-                  Payment details
-                </Link>
-                <button
-                  onClick={closeCart}
-                  className="flex-1 rounded-full py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-neutral-500 transition-colors hover:text-denim-700"
-                >
-                  Continue shopping
-                </button>
-              </div>
+              <button
+                onClick={closeCart}
+                className="mt-2 w-full rounded-full py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-neutral-500 transition-colors hover:text-denim-700"
+              >
+                Continue shopping
+              </button>
             </div>
           </>
         )}

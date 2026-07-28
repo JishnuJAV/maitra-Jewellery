@@ -1,15 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/components/CartProvider';
 import { site, waLink } from '@/lib/site';
 import { formatINR } from '@/lib/format';
-import type { Product } from '@/lib/products';
+import type { CatalogProduct } from '@/lib/catalog';
 
-export default function AddToCart({ product }: { product: Product }) {
+export default function AddToCart({ product }: { product: CatalogProduct }) {
   const { add, openCart } = useCart();
+  const router = useRouter();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+
+  const soldOut = product.stock !== null && product.stock <= 0;
+  const maxQty = product.stock !== null ? Math.max(1, product.stock) : 99;
 
   function handleAdd() {
     add(product.slug, qty);
@@ -19,13 +24,26 @@ export default function AddToCart({ product }: { product: Product }) {
   }
 
   const itemsTotal = product.price * qty;
+  // Shipping isn't quoted here — it depends on the delivery address, which we
+  // only collect at checkout.
   const orderMessage =
     `Hello ${site.name}! 🌸\n\nI'd like to order:\n` +
     `• ${product.name} (Qty: ${qty}) — ${formatINR(itemsTotal)}\n\n` +
-    `Subtotal: ${formatINR(itemsTotal)}\n` +
-    `Shipping: ${formatINR(site.shippingFee)}\n` +
-    `Total: ${formatINR(itemsTotal + site.shippingFee)}\n\n` +
-    `Please share payment details.`;
+    `Subtotal: ${formatINR(itemsTotal)}\n\n` +
+    `Please share delivery charges and payment details.`;
+
+  if (soldOut) {
+    return (
+      <div className="space-y-4">
+        <p className="rounded-xl border border-mist-200 bg-mist-100 px-4 py-3 text-sm font-medium text-neutral-600">
+          This piece is currently sold out.
+        </p>
+        <a href={waLink(orderMessage)} target="_blank" rel="noreferrer" className="btn-whatsapp w-full">
+          Ask us when it&apos;s back
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -33,21 +51,25 @@ export default function AddToCart({ product }: { product: Product }) {
         <span className="text-sm font-medium text-neutral-600">Quantity</span>
         <div className="flex items-center rounded-full border border-mist-300">
           <button
-            onClick={() => setQty((q) => Math.max(1, q - 1))}
+            onClick={() => setQty((value) => Math.max(1, value - 1))}
             className="px-3 py-1.5 text-lg text-denim-700"
-            aria-label="Decrease"
+            aria-label="Decrease quantity"
           >
             −
           </button>
           <span className="w-8 text-center text-sm font-semibold">{qty}</span>
           <button
-            onClick={() => setQty((q) => q + 1)}
-            className="px-3 py-1.5 text-lg text-denim-700"
-            aria-label="Increase"
+            onClick={() => setQty((value) => Math.min(maxQty, value + 1))}
+            disabled={qty >= maxQty}
+            className="px-3 py-1.5 text-lg text-denim-700 disabled:opacity-40"
+            aria-label="Increase quantity"
           >
             +
           </button>
         </div>
+        {product.stock !== null && product.stock <= 5 && (
+          <span className="text-xs font-medium text-amber-700">Only {product.stock} left</span>
+        )}
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
@@ -57,7 +79,7 @@ export default function AddToCart({ product }: { product: Product }) {
         <button
           onClick={() => {
             add(product.slug, qty);
-            openCart();
+            router.push('/checkout');
           }}
           className="btn-primary flex-1"
         >

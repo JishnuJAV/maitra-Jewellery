@@ -5,9 +5,13 @@ export const site = {
   tagline: 'Handcrafted traditional & fashion jewellery',
   description:
     'Maitra Jewellery — handcrafted temple, kemp, palakka, American diamond and micro gold plated necklace sets. Curated pieces at honest prices, delivered across India.',
-  // Public site URL — used to build absolute link-preview (Open Graph) URLs.
-  // IMPORTANT: after deploying, set this to your real domain (or NEXT_PUBLIC_SITE_URL env var).
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://maitra-jewellery.vercel.app',
+  // Public site URL — used for canonical links and Open Graph previews.
+  //
+  // MUST be set via NEXT_PUBLIC_SITE_URL in the Cloudflare environment. The
+  // fallback is a workers.dev placeholder rather than a real domain: if it ever
+  // shows up in a share preview, that is the signal the variable is missing,
+  // instead of silently advertising someone else's domain.
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://maitra-jewellery.workers.dev',
   // Text shown in the link-share preview card (WhatsApp / Instagram / social)
   ogTitle: 'Shop Budget-Friendly Premium Jewellery — Maitra',
   ogDescription:
