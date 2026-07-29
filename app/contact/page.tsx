@@ -1,7 +1,11 @@
 import type { Metadata } from 'next';
 import { site, waLink } from '@/lib/site';
 
-export const metadata: Metadata = { title: 'Contact' };
+export const metadata: Metadata = {
+  title: 'Contact',
+  description: `Questions about a product, sizing or your order? Reach ${site.name} on WhatsApp, email or Instagram — we usually reply within a few hours.`,
+  alternates: { canonical: '/contact' },
+};
 
 export default function ContactPage() {
   return (
@@ -20,7 +24,7 @@ export default function ContactPage() {
           className="rounded-2xl border border-mist-200 bg-white p-6 transition-shadow hover:shadow-md"
         >
           <h2 className="font-serif text-xl font-semibold text-denim-800">WhatsApp / Call</h2>
-          <p className="mt-2 text-neutral-600">{site.phoneDisplay}</p>
+          <p className="mt-2 text-neutral-600">The quickest way to reach us</p>
           <p className="mt-1 text-sm text-[#25D366]">Chat with us →</p>
         </a>
 

@@ -2,8 +2,29 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { products, categories, type Category } from '@/lib/products';
 import ProductCard from '@/components/ProductCard';
+import { site } from '@/lib/site';
 
-export const metadata: Metadata = { title: 'Shop All Jewellery' };
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}): Promise<Metadata> {
+  const { category } = await searchParams;
+  const cat = categories.find((c) => c.id === category);
+
+  const title = cat ? `${cat.label} Jewellery` : 'Shop All Jewellery';
+  const description = cat
+    ? `${cat.blurb} Shop ${cat.label.toLowerCase()} online at ${site.name} — handcrafted pieces at honest prices, delivered across India.`
+    : `Browse the full ${site.name} collection — kemp, palakka, temple, American diamond and micro gold plated jewellery, delivered across India.`;
+  const url = cat ? `/products?category=${cat.id}` : '/products';
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title, description, url },
+  };
+}
 
 export default async function ProductsPage({
   searchParams,

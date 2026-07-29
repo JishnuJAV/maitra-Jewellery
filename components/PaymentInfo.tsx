@@ -37,10 +37,6 @@ export default function PaymentInfo({ amount = 0 }: { amount?: number }) {
               </button>
             </dd>
           </div>
-          <div>
-            <dt className="text-neutral-500">GPay / Phone</dt>
-            <dd className="font-semibold text-neutral-800">{site.gpayNumber}</dd>
-          </div>
           {amount > 0 && (
             <div>
               <dt className="text-neutral-500">Amount to pay</dt>

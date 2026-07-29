@@ -1,15 +1,19 @@
 import type { Metadata } from 'next';
 import PolicyPage from '@/components/PolicyPage';
-import { site } from '@/lib/site';
 
-export const metadata: Metadata = { title: 'Return & Exchange' };
+export const metadata: Metadata = {
+  title: 'Return & Exchange',
+  description:
+    'Our return and exchange policy — how to report a damaged, defective or incorrect item within 48 hours of delivery.',
+  alternates: { canonical: '/returns' },
+};
 
 export default function Returns() {
   return (
     <PolicyPage title="Return & Exchange">
       <p>
         We want you to love your jewellery. If something isn’t right, reach out to us on WhatsApp
-        at {site.phoneDisplay} within 48 hours of delivery.
+        within 48 hours of delivery.
       </p>
       <h2>Damaged or wrong item</h2>
       <p>

@@ -2,7 +2,11 @@ import type { Metadata } from 'next';
 import PolicyPage from '@/components/PolicyPage';
 import { site } from '@/lib/site';
 
-export const metadata: Metadata = { title: 'Privacy Policy' };
+export const metadata: Metadata = {
+  title: 'Privacy Policy',
+  description: `How ${site.name} collects, uses and protects your personal information.`,
+  alternates: { canonical: '/privacy' },
+};
 
 export default function Privacy() {
   return (

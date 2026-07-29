@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import AnnouncementBar from '@/components/AnnouncementBar';
 import CartDrawer from '@/components/CartDrawer';
+import JsonLd from '@/components/JsonLd';
 
 const serif = Cormorant_Garamond({
   subsets: ['latin'],
@@ -40,12 +41,49 @@ export const metadata: Metadata = {
     title: site.ogTitle,
     description: site.ogDescription,
   },
+  alternates: { canonical: '/' },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
+  },
+};
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Store',
+  name: site.name,
+  description: site.description,
+  url: site.siteUrl,
+  logo: `${site.siteUrl}/logo.jpg`,
+  image: `${site.siteUrl}/logo.jpg`,
+  email: site.email,
+  sameAs: [site.instagram],
+  address: {
+    '@type': 'PostalAddress',
+    addressRegion: 'Kerala',
+    addressCountry: 'IN',
+  },
+  areaServed: { '@type': 'Country', name: 'India' },
+  currenciesAccepted: 'INR',
+  paymentAccepted: 'UPI, GPay',
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: site.name,
+  alternateName: site.shortName,
+  url: site.siteUrl,
+  inLanguage: 'en-IN',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${serif.variable} ${sans.variable} ${script.variable}`}>
-      <body className="font-sans">
+      <body className="font-sans" suppressHydrationWarning>
+        <JsonLd data={organizationSchema} />
+        <JsonLd data={websiteSchema} />
         <CartProvider>
           <AnnouncementBar />
           <Header />

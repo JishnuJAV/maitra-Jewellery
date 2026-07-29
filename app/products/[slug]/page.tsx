@@ -7,6 +7,7 @@ import { site } from '@/lib/site';
 import ProductGallery from '@/components/ProductGallery';
 import AddToCart from '@/components/AddToCart';
 import ProductCard from '@/components/ProductCard';
+import JsonLd from '@/components/JsonLd';
 
 export function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));
@@ -20,7 +21,26 @@ export async function generateMetadata({
   const { slug } = await params;
   const product = getProduct(slug);
   if (!product) return { title: 'Product not found' };
-  return { title: product.name, description: product.description };
+
+  const url = `/products/${product.slug}`;
+  return {
+    title: product.name,
+    description: product.description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: 'website',
+      title: `${product.name} — ${formatINR(product.price)}`,
+      description: product.description,
+      url,
+      images: product.images.map((src) => ({ url: src, alt: product.name })),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${product.name} — ${formatINR(product.price)}`,
+      description: product.description,
+      images: product.images.slice(0, 1),
+    },
+  };
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -36,8 +56,56 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     ? Math.round(((product.compareAt - product.price) / product.compareAt) * 100)
     : 0;
 
+  const productUrl = `${site.siteUrl}/products/${product.slug}`;
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description,
+    image: product.images.map((src) => `${site.siteUrl}${src}`),
+    sku: product.slug,
+    category: cat?.label,
+    brand: { '@type': 'Brand', name: site.name },
+    offers: {
+      '@type': 'Offer',
+      url: productUrl,
+      priceCurrency: 'INR',
+      price: product.price,
+      availability: 'https://schema.org/InStock',
+      itemCondition: 'https://schema.org/NewCondition',
+      seller: { '@type': 'Organization', name: site.name },
+    },
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: site.siteUrl },
+      { '@type': 'ListItem', position: 2, name: 'Shop', item: `${site.siteUrl}/products` },
+      ...(cat
+        ? [
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: cat.label,
+              item: `${site.siteUrl}/products?category=${cat.id}`,
+            },
+          ]
+        : []),
+      {
+        '@type': 'ListItem',
+        position: cat ? 4 : 3,
+        name: product.name,
+        item: productUrl,
+      },
+    ],
+  };
+
   return (
     <div className="container-page py-10">
+      <JsonLd data={productSchema} />
+      <JsonLd data={breadcrumbSchema} />
       <nav className="mb-6 text-sm text-neutral-500">
         <Link href="/" className="hover:text-denim-700">Home</Link> /{' '}
         <Link href="/products" className="hover:text-denim-700">Shop</Link> /{' '}

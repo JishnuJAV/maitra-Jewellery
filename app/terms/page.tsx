@@ -2,7 +2,11 @@ import type { Metadata } from 'next';
 import PolicyPage from '@/components/PolicyPage';
 import { site } from '@/lib/site';
 
-export const metadata: Metadata = { title: 'Terms & Conditions' };
+export const metadata: Metadata = {
+  title: 'Terms & Conditions',
+  description: `The terms that apply when you browse or order from ${site.name}.`,
+  alternates: { canonical: '/terms' },
+};
 
 export default function Terms() {
   return (
@@ -31,7 +35,7 @@ export default function Terms() {
         permission.
       </p>
       <h2>Contact</h2>
-      <p>Questions about these terms? Email {site.email} or WhatsApp {site.phoneDisplay}.</p>
+      <p>Questions about these terms? Email {site.email} or reach us on WhatsApp.</p>
     </PolicyPage>
   );
 }

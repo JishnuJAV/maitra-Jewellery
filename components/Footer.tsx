@@ -39,9 +39,8 @@ export default function Footer() {
           <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-mist-300">Get in touch</h4>
           <ul className="space-y-2 text-sm text-mist-200/80">
             <li>
-              WhatsApp / Call:{' '}
               <a href={`tel:${site.phoneDisplay.replace(/\s/g, '')}`} className="hover:text-white">
-                {site.phoneDisplay}
+                WhatsApp / Call
               </a>
             </li>
             <li>

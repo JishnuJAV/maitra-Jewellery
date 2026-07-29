@@ -2,7 +2,11 @@ import type { Metadata } from 'next';
 import PolicyPage from '@/components/PolicyPage';
 import { site } from '@/lib/site';
 
-export const metadata: Metadata = { title: 'Shipping & Delivery' };
+export const metadata: Metadata = {
+  title: 'Shipping & Delivery',
+  description: `Shipping charges, dispatch times and delivery timelines for ${site.name} orders across India.`,
+  alternates: { canonical: '/shipping' },
+};
 
 export default function Shipping() {
   return (

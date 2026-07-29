@@ -25,7 +25,7 @@ export const site = {
   // Flat shipping charge (₹) added to every order.
   shippingFee: 60,
   // Promo banner shown site-wide at the very top.
-  announcement: 'Flat 25% off our 1st Anniversary! Offer valid till August 2nd — grab yours now!',
+  announcement: 'Flat 25% off our 1st Anniversary! Offer valid till August 15th — grab yours now!',
   // Policy
   shippingNote: 'Flat ₹60 shipping charge applies to all orders across India.',
 };
